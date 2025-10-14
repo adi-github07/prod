@@ -3,5 +3,5 @@ kind: StorageClass
 metadata:
   name: ebs-sc
 provisioner: kubernetes.io/aws-ebs
-volumnebindingmode: WaitForFirstConsumer
+volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Retain
