@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: kubernetes.io/aws-ebs
+volumnebindingmode: WaitForFirstConsumer
+reclaimPolicy: Retain
