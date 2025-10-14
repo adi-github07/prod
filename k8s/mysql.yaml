@@ -39,15 +39,15 @@ spec:
       - name: mysql-initdb
         configMap:
           name: backend-config
-    volumeClaimTemplates:
-    - metadata:
-        name: mysql-persistent-storage
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: ebs-sc
-        resources: 
-          requests:
-            storage: 5Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-persistent-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ebs-sc
+      resources: 
+        requests:
+          storage: 5Gi
 
 ---
 apiVersion: v1
@@ -65,3 +65,7 @@ spec:
   selector:
     app: mysql
           
+
+
+
+
