@@ -1,0 +1,25 @@
+replicacount: 1
+
+namespace: cicd
+
+image: 
+    repository: adityashanbhag29/backend
+    tag: v1 
+    pullpolicy: IfNotPresent 
+
+service:
+  type: ClusterIP
+  port: 5000
+
+env:
+  DB_HOST: mysql
+  dbUserSecret:
+    name: mysecret
+    key: username
+  dbPasswordSecret:
+    name: mysecret
+    key: MYSQL_ROOT_PASSWORD
+  dbNameConfigMap:
+    name: mysql-config
+    key: MYSQL_DATABASE
+        
