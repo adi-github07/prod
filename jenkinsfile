@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+    
+    tools{
+        nodejs 'nodejs23'
+    }
+    
+    environment {
+        
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+    
+    stages {
+        stage('Github clone') {
+            steps {
+               git branch: 'main', url: 'https://github.com/adi-github07/prod.git'
+            }
+        }
+        
+                stage('Gitleaks') {
+            steps {
+                sh 'gitleaks detect --source ./client --exit-code 1'
+                sh 'gitleaks detect --source ./api --exit-code 1'
+            }
+        }
+        
+        
+                      
+        stage('sonar') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectName=NodeJS-Project \
+                        -Dsonar.projectKey=NodeJS-Project'''
+                }
+            }
+        }
+
+                  stage('QualityGate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                }
+            }
+        }
+        
+          stage('Trivy Scn') {
+            steps {
+                sh 'trivy fs --format table -o fs-report.html .'
+            }
+        }
+        
+                  stage('DockerBuild backend') {
+            steps {
+                script{
+                     withDockerRegistry(credentialsId: 'docker') {
+                         dir('api'){
+                             sh 'docker build -t adityashanbhag29/backend:latest .'
+                             sh 'trivy image --format table -o backend-image-report.html adityashanbhag29/backend:latest'
+                             sh 'docker push adityashanbhag29/backend:latest'
+                         }
+                  
+                     }
+                }
+            }
+        }
+                          stage('DockerBuild frntend') {
+            steps {
+                script{
+                     withDockerRegistry(credentialsId: 'docker') {
+                         dir('client'){
+                             sh 'docker build -t adityashanbhag29/frontend:latest .'
+                             sh 'trivy image --format table -o frontend-image-report.html adityashanbhag29/frontend:latest'
+                             sh 'docker push  adityashanbhag29/frontend:latest'
+                         }
+                  
+                     }
+                }
+            }
+        }
+        
+                  stage('Aprove') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    input message: 'Approve deployment to Production?' , ok: 'Deploy'
+                }
+ 
+            }
+        }
+                
+        stage('deployment') {
+            steps {
+                script {
+                    withKubeConfig(caCertificate: '', clusterName: 'cicd-cluster', contextName: '', credentialsId: 'k8s-token', namespace: 'cicd', restrictKubeConfigAccess: false, serverUrl: 'https://B87D6A116EED8DEC35810C3C2D65E446.gr7.ap-south-1.eks.amazonaws.com') {
+                        sh 'kubectl apply -f k8s/sc.yaml -n cicd'
+                        sleep 30
+			            sh 'kubectl apply -f k8s/secret.yaml -n cicd'
+                        sh 'kubectl apply -f k8s/config.yaml -n cicd'
+			            sh  'kubectl apply -f k8s/mysql.yaml -n cicd'
+
+                        sh 'kubectl apply -f k8s/backend.yaml -n cicd'
+                        sh 'kubectl apply -f k8s/frontend.yaml -n cicd'
+                        sh 'kubectl apply -f k8s/ci.yaml'
+                        sh 'kubectl apply -f k8s/ingress.yaml'
+                        sleep 30
+                    }
+                }
+            }
+        }
+        
+        stage('deployment get pods') {
+            steps {
+                script {
+                    withKubeConfig(caCertificate: '', clusterName: 'cicd-cluster', contextName: '', credentialsId: 'k8s-token', namespace: 'cicd', restrictKubeConfigAccess: false, serverUrl: 'https://B87D6A116EED8DEC35810C3C2D65E446.gr7.ap-south-1.eks.amazonaws.com') {
+                        sh 'kubectl get pods -n cicd'
+                        sleep 10
+                        sh 'kubectl get ingress -n cicd'
+                    }
+                }
+            }
+        }
+
+    }
+}
