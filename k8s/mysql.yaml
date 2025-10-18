@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql
-  namespace: {{ .Values.namespace }}
+  namespace: cicd
 spec:
   serviceName: mysql
-  replicas: {{ .Values.mysql.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
@@ -16,19 +16,19 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+        image: mysql:8
         ports:
-        - containerPort: {{ .Values.mysql.containerPort }}
+        - containerPort: 3306
         env:    
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.secret.name }}
+              name: mysecret
               key: MYSQL_ROOT_PASSWORD
         - name: MYSQL_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: {{.Values.config.name}}
+              name: mysql-config
               key: MYSQL_DATABASE
         volumeMounts:
         - name: mysql-persistent-storage
@@ -38,7 +38,7 @@ spec:
       volumes:
       - name: mysql-initdb
         configMap:
-          name: {{ .Values.backendInit.name}}
+          name: backend-config
   volumeClaimTemplates:
   - metadata:
       name: mysql-persistent-storage
