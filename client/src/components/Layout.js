@@ -11,12 +11,12 @@ function Layout({ children }) {
         <div className="brand">
           <img src={logo} alt="DevOps Shack logo" className="logo" />
           <div>
-            <h1 className="brand-title">Hello Evryone</h1>
-            <p className="nav-subtitle">User Management</p>
+            <h1 className="brand-title">Hello Devsy</h1>
+            <p className="nav-subtitle">Jus for u</p>
           </div>
         </div>
       </header>
-      <AnimatedBanner message="Welcome here 🚀" />
+      <AnimatedBanner message="Welcome here 🚀.Thanks for taking time out u can have lunch" />
       <div className="app-body">
         <aside className="sidebar slide-in-left">
           <h3>Connect</h3>
