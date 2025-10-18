@@ -9,18 +9,16 @@ spec:
     matchLabels:
       app: frontend
   template:
-    metadata: 
+    metadata:
       labels:
         app: frontend
     spec:
       containers:
         - name: frontend
-          image: adityashanbhag29/frontend:latest
+          image: adityashanbhag29/frontend:3793822ca0022dcdf826c7a796f58098f21af815
           ports:
-          - containerPort: 80
-
+            - containerPort: 80
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -29,7 +27,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    targetPort: 80
+    - port: 80
+      targetPort: 80
   selector:
     app: frontend
