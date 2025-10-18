@@ -49,22 +49,6 @@ spec:
         requests:
           storage: 5Gi
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-  namespace: cicd
-  labels:
-    app: mysql
-spec:
-  clusterIP: None
-  ports:
-  - port: 3306
-    targetPort: 3306
-  selector:
-    app: mysql
-          
 
 
 

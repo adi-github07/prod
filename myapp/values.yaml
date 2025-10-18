@@ -1,0 +1,61 @@
+namespace: cicd 
+
+backend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: adityashanbhag29/backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 5000
+
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: adityashanbhag29/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 3000
+
+mysql:
+  enabled: true
+  replicaCount: 1
+  image: 
+    repository: mysql
+    tag: 8
+    pullPolicy: IfNotPresent
+  containerPort: 3306
+
+
+config:
+  name: mysql-config
+  labels:
+    app: mysql
+  data:
+    MYSQL_DATABASE: crud_app
+
+backendInit:
+  name: backend-config
+  initSql: |
+    CREATE DATABASE IF NOT EXISTS crud_app;
+
+    USE crud_app;
+
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      role ENUM('admin', 'viewer') NOT NULL DEFAULT 'viewer',
+      is_active TINYINT(1) DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+secret:
+  name: mysecret
+  type: Opaque
+  stringData:
+    MYSQL_ROOT_PASSWORD: Aditya
+    username: root
