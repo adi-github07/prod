@@ -11,8 +11,13 @@ function Layout({ children }) {
         <div className="brand">
           <img src={logo} alt="DevOps Shack logo" className="logo" />
           <div>
+<<<<<<< HEAD
             <h1 className="brand-title">Hello Devsy</h1>
             <p className="nav-subtitle">Jus for u</p>
+=======
+            <h1 className="brand-title">Hello everyone</h1>
+            <p className="nav-subtitle">User Management</p>
+>>>>>>> 964f51d (forst)
           </div>
         </div>
       </header>

@@ -1,31 +1,43 @@
-# 3-Tier DevSecOps Project
 
-This repository contains a simple Node.js API and a React client used for a user management demo. Follow the steps below to get the project running locally.
+CICD Devsecops project
 
-## Setup
+My first complete end to end CICD and Devsecops best pratices project
 
-1. Install Node.js (version 18 or later is recommended).
-2. Install dependencies for both the API and client:
+**First run  the terraform script**
+1. It will create a VPC,2 subnets,attaches a internet gateway,route table is attached to subnets so that it connects to internet.
+2. Then it creates aws_eks_clutser which is control plane  and aws_eks_node_group for worker nodes
+3. Once it is done run the following command so that EKS is configured
 
-   ```bash
-   cd api && npm install
-   cd ../client && npm install
-   ```
+```bash
+aws eks --region <region> update-kubeconfig --name <cluter-anme>
+```
+        
+3. Now associate iam oidc with eks so that  it connects and communicates  with ebs by running the below command 
 
-3. Start the API server:
+```bash
+eksctl utils associate-iam-oidc-provider \
+  --region <region> \
+  --cluster <cluter-anme> \
+  --approve
+```
 
-   ```bash
-   cd api
-   npm start
-   ```
+ Create IAM Service Account for EBS CSI Driver
+ ```bash
+eksctl create iamserviceaccount \
+  --region ap-south-1 \
+  --name ebs-csi-controller-sa \
+  --namespace kube-system \
+  --cluster devopsshack-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+  --approve \
+  --override-existing-serviceaccounts
+```
 
-4. In a separate terminal, start the React client:
+4.Add add-ons so that AWS EBS CSI driver lets Kubernetes automatically create, attach, and manage EBS volumes.
+ ```bash
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/ecr/?ref=release-1.11"
+```
 
-   ```bash
-   cd client
-   npm start
-   ```
+5.Apply RBAC manifests (Role, RoleBinding, ClusterRole, ClusterRoleBinding) to set proper permissions for the driver and other components: 
 
-5. Open `http://localhost:3000` in your browser to use the application.
 
-The client now displays an animated banner welcoming you to **DevOps Shack**.
